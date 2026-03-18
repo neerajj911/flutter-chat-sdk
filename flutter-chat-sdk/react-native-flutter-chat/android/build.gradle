@@ -1,0 +1,51 @@
+buildscript {
+    ext.kotlin_version = '1.9.22'
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdk 34
+    namespace 'com.flutterchat.sdk'
+
+    defaultConfig {
+        minSdk 21
+        targetSdk 34
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+// ── Flutter AAR local Maven repo ──────────────────────────────────────────────
+// AARs are placed here by `flutter build aar` via GitHub Actions (or manually).
+repositories {
+    maven {
+        url "$projectDir/libs/flutter_repo"
+    }
+}
+
+dependencies {
+    implementation 'com.facebook.react:react-android:0.73.0'
+
+    // Flutter embedding — version matches whatever `flutter build aar` produced
+    implementation 'io.flutter:flutter_embedding_release:1.0.0-3316dd8728419ad3534e3f6112aa6291f587078a'
+
+    // Flutter module AAR — update version to match flutter_chat_module pubspec version
+    implementation(name: 'flutter_chat_module-release', ext: 'aar')
+}

@@ -1,0 +1,20 @@
+pluginManagement {
+    includeBuild("../node_modules/@react-native/gradle-plugin")
+}
+
+plugins {
+    id("com.facebook.react.settings")
+}
+
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    ex.autolinkLibrariesFromCommand()
+}
+
+rootProject.name = 'RNDemoApp'
+
+include ':app'
+include ':react-native-flutter-chat'
+project(':react-native-flutter-chat').projectDir = new File(
+    rootProject.projectDir,
+    '../../react-native-flutter-chat/android'
+)
