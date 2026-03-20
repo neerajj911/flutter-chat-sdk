@@ -1,10 +1,11 @@
 {
   "name": "react-native-flutter-chat",
-  "version": "1.0.0",
+  "version": "1.0.9",
   "description": "React Native SDK that embeds a Flutter-powered chat UI via native Android bridge",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
+    "postinstall": "node setup.js",
     "lint": "eslint src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit"
   },
@@ -14,6 +15,13 @@
     "chat",
     "sdk",
     "android"
+  ],
+  "files": [
+    "src",
+    "android",
+    "setup.js",
+    "react-native.config.js",
+    "README.md"
   ],
   "author": "",
   "license": "MIT",

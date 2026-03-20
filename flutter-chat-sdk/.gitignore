@@ -1,29 +1,25 @@
-# ── Flutter ───────────────────────────────────────────────────────────────────
-flutter_chat_module/.dart_tool/
-flutter_chat_module/.flutter-plugins
-flutter_chat_module/.flutter-plugins-dependencies
+﻿# Flutter module - build outputs & generated files
 flutter_chat_module/build/
-flutter_chat_module/.packages
+flutter_chat_module/.android/.gradle/
+flutter_chat_module/.android/Flutter/build/
+flutter_chat_module/.android/local.properties
+flutter_chat_module/.ios/Flutter/ephemeral/
+flutter_chat_module/.dart_tool/
 
-# ── React Native SDK ──────────────────────────────────────────────────────────
+# React Native SDK
 react-native-flutter-chat/node_modules/
-react-native-flutter-chat/android/libs/*.aar
-# Keep flutter_repo dir structure but ignore contents (rebuilt by CI)
 react-native-flutter-chat/android/libs/flutter_repo/
 
-# ── RN Demo App ───────────────────────────────────────────────────────────────
+# RN Demo App
 RNDemoApp/node_modules/
 RNDemoApp/android/.gradle/
 RNDemoApp/android/app/build/
 RNDemoApp/android/build/
 RNDemoApp/android/local.properties
-RNDemoApp/android/app/debug.keystore
-RNDemoApp/.expo/
 
-# ── General ───────────────────────────────────────────────────────────────────
+# General
 .DS_Store
 *.iml
 .idea/
 *.log
 .env
-.env.local

@@ -92,7 +92,15 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               Text(
                 widget.user.name,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                style: const TextStyle(
+                    fontSize: 12, fontWeight: FontWeight.normal),
+              ),
+              Text(
+                widget.user.email,
+                style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.normal,
+                    color: Color(0xFFCCDDFF)),
               ),
             ],
           ),

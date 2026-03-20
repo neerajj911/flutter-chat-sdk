@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:flutter_chat_module/models/chat_user.dart';
 import 'services/platform_channel.dart';
 import 'screens/chat_screen.dart';
 
@@ -42,9 +43,7 @@ class _FlutterChatAppState extends State<FlutterChatApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0066FF)),
         useMaterial3: true,
       ),
-      home: _user == null
-          ? const _LoadingScreen()
-          : ChatScreen(user: _user!),
+      home: _user == null ? const _LoadingScreen() : ChatScreen(user: _user!),
     );
   }
 }
@@ -61,3 +60,10 @@ class _LoadingScreen extends StatelessWidget {
     );
   }
 }
+// ci-fix
+// granular-token
+// new-token
+// token-v3
+// fix-release
+// remove-release-step
+// autolink

@@ -1,11 +1,11 @@
 buildscript {
     ext {
         buildToolsVersion = "34.0.0"
-        minSdkVersion     = 21
+        minSdkVersion = 24
         compileSdkVersion = 34
-        targetSdkVersion  = 34
-        ndkVersion        = "25.1.8937393"
-        kotlinVersion     = "1.9.22"
+        targetSdkVersion = 34
+        ndkVersion = "25.1.8937393"
+        kotlinVersion = "1.8.0"
     }
     repositories {
         google()
@@ -14,20 +14,21 @@ buildscript {
     dependencies {
         classpath("com.android.tools.build:gradle")
         classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
     }
 }
 
-// Make the Flutter local Maven repo visible to ALL subprojects (SDK included)
+apply plugin: "com.facebook.react.rootproject"
+
 allprojects {
     repositories {
         google()
         mavenCentral()
-        maven { url "https://jitpack.io" }
-
-        // Flutter AAR repo built by `flutter build aar`
         maven {
-            url "${rootProject.projectDir}/../../react-native-flutter-chat/android/libs/flutter_repo"
+            url uri("$rootDir/../../react-native-flutter-chat/android/libs/flutter_repo")
+        }
+        maven {
+            url "https://storage.googleapis.com/download.flutter.io"
         }
     }
 }

@@ -1,8 +1,7 @@
-package com.flutterchat.sdk
+﻿package com.flutterchat.sdk
 
 import android.content.Intent
 import com.facebook.react.bridge.*
-import io.flutter.embedding.android.FlutterActivity
 
 class FlutterChatModule(private val reactContext: ReactApplicationContext) :
     ReactContextBaseJavaModule(reactContext) {
@@ -15,10 +14,7 @@ class FlutterChatModule(private val reactContext: ReactApplicationContext) :
         val name  = options.getString("name")  ?: ""
         val email = options.getString("email") ?: ""
 
-        val activity = currentActivity ?: run {
-            reactContext.emitEvent("FlutterChatError", "No current activity found")
-            return
-        }
+        val activity = currentActivity ?: return
 
         val intent = FlutterChatActivity.createIntent(
             context = activity,
@@ -28,12 +24,5 @@ class FlutterChatModule(private val reactContext: ReactApplicationContext) :
         )
 
         activity.startActivity(intent)
-    }
-
-    // ── helpers ──────────────────────────────────────────────────────────────
-
-    private fun ReactContext.emitEvent(name: String, message: String) {
-        getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-            ?.emit(name, message)
     }
 }
