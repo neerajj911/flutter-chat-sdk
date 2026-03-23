@@ -70,17 +70,17 @@ flutter-chat-sdk/
 
 ```bash
 # npm  (replace YOUR_GITHUB_USERNAME and the version tag)
-npm install github:YOUR_GITHUB_USERNAME/flutter-chat-sdk/react-native-flutter-chat#v1.0.15
+npm install github:neerajj911/flutter-chat-sdk/react-native-flutter-chat#v1.0.15
 
 # yarn
-yarn add github:YOUR_GITHUB_USERNAME/flutter-chat-sdk#v1.0.15
+yarn add github:neerajj911/flutter-chat-sdk#v1.0.15
 ```
 
 Or pin a specific version in your `package.json`:
 
 ```json
 "dependencies": {
-  "react-native-flutter-chat": "github:YOUR_GITHUB_USERNAME/flutter-chat-sdk#v1.0.15"
+  "react-native-flutter-chat": "github:neerajj911/flutter-chat-sdk#v1.0.15"
 }
 ```
 
