@@ -30,7 +30,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   void _startDebugTimer() {
     _debugTimer = Timer.periodic(const Duration(seconds: 5), (_) {
       // ignore: avoid_print
-      print(
+      debugPrint(
           '[ChatScreen] Still active — user: ${widget.user.name} (${widget.user.id})');
     });
   }
@@ -109,7 +109,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Chat Support',
+                'Chat Support - development build',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Text(
