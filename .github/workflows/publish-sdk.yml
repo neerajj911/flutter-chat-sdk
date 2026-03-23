@@ -46,12 +46,12 @@ jobs:
           cache: true
 
       - name: Flutter pub get
-        working-directory: flutter_chat_module
+        working-directory: flutter-chat-sdk/flutter_chat_module
         run: flutter pub get
 
       # 4. Build Flutter AAR
       - name: Build Flutter AAR
-        working-directory: flutter_chat_module
+        working-directory: flutter-chat-sdk/flutter_chat_module
         run: |
           flutter build aar \
             --no-profile \
@@ -62,16 +62,16 @@ jobs:
       #    Both are committed so GitHub-based installs include all build artifacts.
       - name: Copy AARs to SDK libs
         run: |
-          LIBS="react-native-flutter-chat/android/libs"
+          LIBS="flutter-chat-sdk/react-native-flutter-chat/android/libs"
           mkdir -p "$LIBS"
 
           # Copy individual AARs (flat)
-          find flutter_chat_module/build/host/outputs/repo \
+          find flutter-chat-sdk/flutter_chat_module/build/host/outputs/repo \
             -name "*.aar" -exec cp {} "$LIBS/" \;
 
           # Copy full Maven repo (required by android/build.gradle)
           rm -rf "$LIBS/flutter_repo"
-          cp -r flutter_chat_module/build/host/outputs/repo \
+          cp -r flutter-chat-sdk/flutter_chat_module/build/host/outputs/repo \
             "$LIBS/flutter_repo"
 
           echo "AARs in $LIBS:"
@@ -79,7 +79,7 @@ jobs:
 
       # 6. Set version in package.json to match the requested tag
       - name: Set version in package.json
-        working-directory: react-native-flutter-chat
+        working-directory: flutter-chat-sdk/react-native-flutter-chat
         run: |
           VERSION="${{ github.event.inputs.version }}"
           # Strip leading 'v' for the semver field (v1.2.0 -> 1.2.0)
