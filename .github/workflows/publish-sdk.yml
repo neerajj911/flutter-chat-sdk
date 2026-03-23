@@ -17,6 +17,9 @@ on:
         required: false
         default: 'New release'
 
+permissions:
+  contents: write
+
 jobs:
   release:
     name: Build AAR and Create GitHub Release
@@ -123,4 +126,4 @@ jobs:
             "react-native-flutter-chat": "github:${{ github.repository }}#${{ github.event.inputs.version }}"
             ```
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
