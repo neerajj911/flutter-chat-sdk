@@ -1,0 +1,12 @@
+﻿# This workflow has been replaced by publish-sdk.yml ("Release SDK").
+# To release a new version:
+#   GitHub -> Actions -> "Release SDK" -> Run workflow -> enter version tag (e.g. v1.2.0)
+
+name: Manual Release (deprecated - use Release SDK)
+
+on:
+  workflow_dispatch:
+    inputs:
+      note:
+        description: 'This workflow is deprecated. Use "Release SDK" instead.'
+        required: false
