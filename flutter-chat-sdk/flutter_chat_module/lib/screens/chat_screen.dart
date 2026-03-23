@@ -1,6 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/chat_user.dart';
-import '../services/platform_channel.dart';
+import '../services/platform_channel.dart' hide debugPrint;
 import '../widgets/message_bubble.dart';
 import '../widgets/message_input.dart';
 
@@ -13,14 +14,34 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   final List<ChatMessage> _messages = [];
   final ScrollController _scrollController = ScrollController();
+  Timer? _debugTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadDemoMessages();
+    _startDebugTimer();
+  }
+
+  void _startDebugTimer() {
+    _debugTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      debugPrint(
+          '[ChatScreen] Still active — user: ${widget.user.name} (${widget.user.id})');
+    });
+  }
+
+  // Pause timer when app goes to background, resume when it comes back
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _startDebugTimer();
+    } else if (state == AppLifecycleState.paused) {
+      _debugTimer?.cancel();
+    }
   }
 
   void _loadDemoMessages() {
@@ -126,6 +147,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    _debugTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _scrollController.dispose();
     super.dispose();
   }
