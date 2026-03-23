@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
 export "FLUTTER_ROOT=/opt/hostedtoolcache/flutter/stable-3.22.0-x64"
-export "FLUTTER_APPLICATION_PATH=/home/runner/work/flutter-chat-sdk/flutter-chat-sdk/flutter_chat_module"
+export "FLUTTER_APPLICATION_PATH=/home/runner/work/flutter-chat-sdk/flutter-chat-sdk/flutter-chat-sdk/flutter_chat_module"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_TARGET=lib/main.dart"
 export "FLUTTER_BUILD_DIR=build"

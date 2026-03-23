@@ -3,11 +3,11 @@
   <groupId>com.flutterchat.module</groupId>
   <artifactId>flutter_release</artifactId>
   <versioning>
-    <latest>1.0</latest>
-    <release>1.0</release>
+    <latest>1</latest>
+    <release>1</release>
     <versions>
-      <version>1.0</version>
+      <version>1</version>
     </versions>
-    <lastUpdated>20260318063736</lastUpdated>
+    <lastUpdated>20260323044949</lastUpdated>
   </versioning>
 </metadata>
