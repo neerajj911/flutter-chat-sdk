@@ -1,33 +1,43 @@
-﻿name: Build & Publish SDK
+﻿name: Release SDK
+
+# How to release a new version:
+# 1. Go to GitHub -> Actions -> "Release SDK" -> Run workflow
+# 2. Enter the version tag, e.g.  v1.2.0
+# 3. CI builds the Flutter AAR, commits it, tags the repo, creates a GitHub Release
+# 4. Consumers install with:  npm install github:<owner>/<repo>#v1.2.0
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'flutter_chat_module/**'
-      - '!flutter_chat_module/**.md'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to create (e.g. v1.2.0)'
+        required: true
+      notes:
+        description: 'Release notes (shown in the GitHub Release)'
+        required: false
+        default: 'New release'
 
 jobs:
-  build-and-publish:
-    name: AAR â†’ SDK â†’ npm
+  release:
+    name: Build AAR and Create GitHub Release
     runs-on: ubuntu-latest
 
     steps:
-      # â”€â”€ 1. Checkout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      # 1. Checkout
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GH_PAT }}
 
-      # â”€â”€ 2. Java â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      # 2. Java
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      # â”€â”€ 3. Flutter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      # 3. Flutter
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -39,7 +49,7 @@ jobs:
         working-directory: flutter_chat_module
         run: flutter pub get
 
-      # â”€â”€ 4. Build AAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      # 4. Build Flutter AAR
       - name: Build Flutter AAR
         working-directory: flutter_chat_module
         run: |
@@ -48,76 +58,69 @@ jobs:
             --no-debug \
             --build-number 1
 
-      # â”€â”€ 5. Copy AARs â†’ SDK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      # 5. Copy AARs + full Maven repo into SDK libs
+      #    Both are committed so GitHub-based installs include all build artifacts.
       - name: Copy AARs to SDK libs
         run: |
           LIBS="react-native-flutter-chat/android/libs"
           mkdir -p "$LIBS"
 
-          # Copy all generated AARs
+          # Copy individual AARs (flat)
           find flutter_chat_module/build/host/outputs/repo \
             -name "*.aar" -exec cp {} "$LIBS/" \;
 
-          # Copy the full Maven repo (flutter_embedding + plugins)
+          # Copy full Maven repo (required by android/build.gradle)
+          rm -rf "$LIBS/flutter_repo"
           cp -r flutter_chat_module/build/host/outputs/repo \
             "$LIBS/flutter_repo"
 
-          echo "â”€â”€ AARs in $LIBS â”€â”€"
+          echo "AARs in $LIBS:"
           find "$LIBS" -name "*.aar"
 
-      # â”€â”€ 6. Bump version â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-      - name: Bump patch version
-        id: version
+      # 6. Set version in package.json to match the requested tag
+      - name: Set version in package.json
         working-directory: react-native-flutter-chat
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          NEW_VERSION=$(npm version patch --no-git-tag-version)
-          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          VERSION="${{ github.event.inputs.version }}"
+          # Strip leading 'v' for the semver field (v1.2.0 -> 1.2.0)
+          PKG_VERSION="${VERSION#v}"
+          npm version "$PKG_VERSION" --no-git-tag-version
 
-      # â”€â”€ 7. Commit & tag â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-      - name: Commit & push
+      # 7. Commit built artifacts + tag
+      - name: Commit and tag
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git
+          git remote set-url origin \
+            https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git
           git add .
-          git commit -m "chore: release ${{ steps.version.outputs.new_version }} [skip ci]"
-          git tag "${{ steps.version.outputs.new_version }}"
+          git commit -m "chore: release ${{ github.event.inputs.version }} [skip ci]"
+          git tag "${{ github.event.inputs.version }}"
           git pull --rebase origin main
           git push origin main --follow-tags
 
-      # â”€â”€ 8. Publish npm â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-      - name: Set up Node 20
-        uses: actions/setup-node@v4
+      # 8. Create GitHub Release with install instructions
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
-          always-auth: true
+          tag_name: ${{ github.event.inputs.version }}
+          name: ${{ github.event.inputs.version }}
+          body: |
+            ${{ github.event.inputs.notes }}
 
-      - name: npm publish
-        working-directory: react-native-flutter-chat
-        run: |
-          npm install --legacy-peer-deps
-          npm publish --access public
+            ---
+            **Install this version:**
+            ```bash
+            # npm
+            npm install github:${{ github.repository }}#${{ github.event.inputs.version }}
+
+            # yarn
+            yarn add github:${{ github.repository }}#${{ github.event.inputs.version }}
+            ```
+
+            **Or pin it in package.json:**
+            ```json
+            "react-native-flutter-chat": "github:${{ github.repository }}#${{ github.event.inputs.version }}"
+            ```
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      # # â”€â”€ 9. GitHub Release â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-      # - name: Create GitHub Release
-      #   uses: softprops/action-gh-release@v2
-      #   with:
-      #     tag_name: ${{ steps.version.outputs.new_version }}
-      #     name: ${{ steps.version.outputs.new_version }}
-      #     body: |
-      #       ### Automated Release
-      #       Triggered by Flutter source change on `main`.
-
-      #       **Commit:** ${{ github.sha }}
-      #       **Build:** #${{ github.run_number }}
-
-      #       ```bash
-      #       npm update react-native-flutter-chat
-      #       ```
-
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

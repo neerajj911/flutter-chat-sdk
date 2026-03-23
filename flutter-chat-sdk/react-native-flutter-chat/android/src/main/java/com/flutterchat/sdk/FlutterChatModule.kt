@@ -14,7 +14,7 @@ class FlutterChatModule(private val reactContext: ReactApplicationContext) :
         val name  = options.getString("name")  ?: ""
         val email = options.getString("email") ?: ""
 
-        val activity = currentActivity ?: return
+        val activity = reactApplicationContext.currentActivity ?: return
 
         val intent = FlutterChatActivity.createIntent(
             context = activity,

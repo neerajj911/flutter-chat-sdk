@@ -1,7 +1,12 @@
 {
   "name": "react-native-flutter-chat",
-  "version": "1.0.9",
+  "version": "1.0.15",
   "description": "React Native SDK that embeds a Flutter-powered chat UI via native Android bridge",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_GITHUB_USERNAME/flutter-chat-sdk.git",
+    "directory": "react-native-flutter-chat"
+  },
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {

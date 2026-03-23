@@ -8,7 +8,7 @@ flutter_chat_module/.dart_tool/
 
 # React Native SDK
 react-native-flutter-chat/node_modules/
-react-native-flutter-chat/android/libs/flutter_repo/
+# flutter_repo/ is intentionally committed so GitHub-based installs include it
 
 # RN Demo App
 RNDemoApp/node_modules/

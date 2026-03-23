@@ -63,47 +63,44 @@ function fixLocalProperties() {
   ok('local.properties — backslashes fixed in sdk.dir');
 }
 
-// ── 2. gradle-wrapper.properties — point to cached Gradle ────────────────────
+// ── 2. gradle-wrapper.properties — enforce minimum Gradle version ────────────
+
+// React Native 0.76+ / AGP 8.7+ requires Gradle 8.13 minimum.
+// Always set this unconditionally — do NOT rely on local cache detection.
+const MIN_GRADLE_VERSION = '8.13';
+const MIN_GRADLE_URL = `https\\://services.gradle.org/distributions/gradle-${MIN_GRADLE_VERSION}-bin.zip`;
+
+function parseGradleVersion(url) {
+  const m = url.match(/gradle-(\d+\.\d+(?:\.\d+)?)-/);
+  return m ? m[1].split('.').map(Number) : [0];
+}
+
+function isVersionLt(a, b) {
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const diff = (a[i] || 0) - (b[i] || 0);
+    if (diff !== 0) return diff < 0;
+  }
+  return false;
+}
 
 function fixGradleWrapper() {
   const file = path.join(ANDROID, 'gradle', 'wrapper', 'gradle-wrapper.properties');
   if (!fileExists(file)) { skip('gradle-wrapper.properties'); return; }
 
-  // Check which Gradle versions are locally cached
-  const distsDir = path.join(os.homedir(), '.gradle', 'wrapper', 'dists');
-  let bestVersion = null;
+  let content = read(file);
+  const currentMatch = content.match(/distributionUrl=(.+)/);
+  const currentUrl   = currentMatch ? currentMatch[1].trim() : '';
+  const currentVer   = parseGradleVersion(currentUrl);
+  const minVer       = parseGradleVersion(MIN_GRADLE_URL);
 
-  const preferred = ['gradle-8.6-bin', 'gradle-8.6-all', 'gradle-8.3-all', 'gradle-8.3-bin'];
-
-  if (fileExists(distsDir)) {
-    for (const v of preferred) {
-      const vDir = path.join(distsDir, v);
-      if (fileExists(vDir)) {
-        // Check if it's fully downloaded (has a subdir with gradle-wrapper jar)
-        const sub = fs.readdirSync(vDir);
-        if (sub.length > 0) {
-          bestVersion = v;
-          break;
-        }
-      }
-    }
-  }
-
-  if (!bestVersion) {
-    warning('No cached Gradle found — keeping existing wrapper version');
+  if (!isVersionLt(currentVer, minVer)) {
+    ok(`gradle-wrapper.properties — Gradle already >= ${MIN_GRADLE_VERSION}`);
     return;
   }
 
-  const zipType = bestVersion.includes('-all') ? 'all' : 'bin';
-  const version = bestVersion.replace('gradle-', '').replace(`-${zipType}`, '');
-  const newUrl   = `https\\://services.gradle.org/distributions/gradle-${version}-${zipType}.zip`;
-
-  let content = read(file);
-  const updated = content.replace(/distributionUrl=.+/, `distributionUrl=${newUrl}`);
-
-  if (updated === content) { ok('gradle-wrapper.properties already correct'); return; }
+  const updated = content.replace(/distributionUrl=.+/, MIN_GRADLE_URL);
   write(file, updated);
-  ok(`gradle-wrapper.properties — using cached Gradle ${version}-${zipType}`);
+  ok(`gradle-wrapper.properties — Gradle updated to ${MIN_GRADLE_VERSION}`);
 }
 
 // ── 3. android/settings.gradle — add subproject ──────────────────────────────
@@ -243,12 +240,27 @@ function fixGradleProperties() {
   }
 
   ensure('android.useAndroidX', 'true');
-  ensure('android.enableJetifier', 'true');
-  ensure('newArchEnabled', 'false');
+
+  // Remove enableJetifier — not needed for RN 0.71+ (fully AndroidX); enabling it
+  // causes Jetifier to process all AARs including large RN ones, leading to Java heap OOM.
+  if (/^android\.enableJetifier\s*=.*/m.test(content)) {
+    content = content.replace(/^android\.enableJetifier\s*=.*\n?/m, '');
+    changed = true;
+  }
+
+  // Ensure JVM heap is sufficient for Gradle transforms (Flutter AAR + RN AARs can be large)
+  ensure('org.gradle.jvmargs', '-Xmx4096m -XX:MaxMetaspaceSize=512m');
+
+  // Remove newArchEnabled if present — unsupported in RN 0.82+ (new arch is always on)
+  // The SDK bridge works via the legacy interop layer automatically
+  if (/^newArchEnabled\s*=.*/m.test(content)) {
+    content = content.replace(/^newArchEnabled\s*=.*\n?/m, '');
+    changed = true;
+  }
 
   if (!changed) { ok('android/gradle.properties — flags already correct'); return; }
   write(file, content);
-  ok('android/gradle.properties — useAndroidX, Jetifier, newArchEnabled=false set');
+  ok('android/gradle.properties — useAndroidX set, enableJetifier removed, JVM heap set to 4096m, newArchEnabled removed');
 }
 
 // ── Run ───────────────────────────────────────────────────────────────────────

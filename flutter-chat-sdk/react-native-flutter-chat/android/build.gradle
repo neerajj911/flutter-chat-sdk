@@ -47,6 +47,6 @@ repositories {
 
 dependencies {
     implementation 'com.facebook.react:react-android:+'
-    // Version always matches --build-number 1 in CI
-    implementation 'com.flutterchat.module:flutter_release:1.0'
+    // Version matches --build-number 1 in CI (Flutter AAR Maven version = build number)
+    implementation 'com.flutterchat.module:flutter_release:1'
 }

@@ -58,8 +58,7 @@ flutter-chat-sdk/
 │
 └── .github/
     └── workflows/
-        ├── publish-sdk.yml           # Auto: push to main → build → npm publish
-        ├── manual-release.yml        # Manual: choose patch/minor/major
+        ├── publish-sdk.yml           # Manual: enter version tag → build AAR → GitHub Release
         └── pr-validation.yml         # PR guard: analyze + test + build AAR
 ```
 
@@ -67,9 +66,31 @@ flutter-chat-sdk/
 
 ## How to Use the SDK (3rd-party developer)
 
+### Install
+
 ```bash
-npm install react-native-flutter-chat
+# npm  (replace YOUR_GITHUB_USERNAME and the version tag)
+npm install github:YOUR_GITHUB_USERNAME/flutter-chat-sdk/react-native-flutter-chat#v1.0.15
+
+# yarn
+yarn add github:YOUR_GITHUB_USERNAME/flutter-chat-sdk#v1.0.15
 ```
+
+Or pin a specific version in your `package.json`:
+
+```json
+"dependencies": {
+  "react-native-flutter-chat": "github:YOUR_GITHUB_USERNAME/flutter-chat-sdk#v1.0.15"
+}
+```
+
+Then run `npm install` (or `yarn`). The `postinstall` script patches your Android project automatically.
+
+### Upgrade to a newer version
+
+Change the tag in your `package.json` to the new version (e.g. `#v1.1.0`) and run `npm install` again.
+
+### Usage
 
 ```ts
 import { openFlutterChat } from 'react-native-flutter-chat';
@@ -107,18 +128,38 @@ npx react-native run-android
 
 ---
 
-## CI/CD — Automated Pipeline
+## Releasing a New Version
 
-| Trigger | Workflow | What it does |
+Versioning is **manual** — you control exactly when and what version gets released.
+
+1. Make your code changes and push to `main`.
+2. Go to **GitHub → Actions → Release SDK → Run workflow**.
+3. Enter the version tag (e.g. `v1.2.0`) and optional release notes.
+4. CI will:
+   - Build the Flutter AAR
+   - Copy it into `react-native-flutter-chat/android/libs/`
+   - Update `version` in `package.json` to match
+   - Commit the built artifacts back to `main`
+   - Create and push the git tag
+   - Create a GitHub Release with copy-paste install instructions
+5. Consumers update their dependency tag to get the new version.
+
+> **Tip:** Follow [Semantic Versioning](https://semver.org/) — `v<major>.<minor>.<patch>`.
+
+---
+
+## CI/CD
+
+| Workflow | Trigger | What it does |
 |---|---|---|
-| Push to `main` (Flutter files changed) | `publish-sdk.yml` | Builds AAR → copies to SDK → bumps patch → publishes npm |
-| Manual via GitHub Actions UI | `manual-release.yml` | Same, but you choose patch / minor / major |
-| Pull Request to `main` | `pr-validation.yml` | Analyze + test + build check, posts PR comment |
+| `publish-sdk.yml` | Manual (Actions UI) | Build AAR → commit → tag → GitHub Release |
+| `pr-validation.yml` | Pull Request to `main` | Flutter analyze + test + AAR build check |
 
 ### One-time setup
-1. Add `NPM_TOKEN` secret (npmjs.com → Access Tokens → Automation type)
-2. Add `GH_PAT` secret (GitHub → Settings → Developer Settings → PAT classic → `repo` + `workflow`)
-3. Settings → Actions → General → enable **Read and write permissions**
+1. Add `GH_PAT` secret (GitHub → Settings → Developer Settings → PAT classic → `repo` + `workflow`)
+2. Settings → Actions → General → enable **Read and write permissions**
+
+> No NPM_TOKEN needed — the SDK is distributed via GitHub only.
 
 ---
 
