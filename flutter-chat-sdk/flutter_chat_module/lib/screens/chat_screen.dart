@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import '../models/chat_user.dart';
 import '../services/platform_channel.dart' hide debugPrint;
@@ -30,10 +29,9 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
 
   void _startDebugTimer() {
     _debugTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      dev.log(
-        'Still active — user: ${widget.user.name} (${widget.user.id})',
-        name: 'ChatScreen',
-      );
+      // ignore: avoid_print
+      print(
+          '[ChatScreen] Still active — user: ${widget.user.name} (${widget.user.id})');
     });
   }
 
