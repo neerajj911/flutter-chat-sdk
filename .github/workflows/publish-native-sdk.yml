@@ -86,8 +86,11 @@ jobs:
       - name: Publish SDK to local Maven repo
         working-directory: native-android-sdk
         run: |
+          # Strip any leading 'v' from the version so artifact is e.g. 1.2.0 not v1.2.0
+          VERSION="${{ github.event.inputs.version }}"
+          VERSION="${VERSION#v}"
           gradle :sdk:publish \
-            -PSDK_VERSION=${{ github.event.inputs.version }} \
+            -PSDK_VERSION="$VERSION" \
             -PGITHUB_REPO=${{ github.repository }} \
             -PMAVEN_REPO_URL=file:///tmp/maven-publish \
             --stacktrace
