@@ -58,11 +58,11 @@ jobs:
       # ── Build Flutter AAR ──────────────────────────────────────────
 
       - name: Flutter pub get
-        working-directory: flutter_chat_module
+        working-directory: flutter-chat-sdk/flutter_chat_module
         run: flutter pub get
 
       - name: Build Flutter AAR
-        working-directory: flutter_chat_module
+        working-directory: flutter-chat-sdk/flutter_chat_module
         run: |
           flutter build aar \
             --no-profile \
@@ -76,7 +76,7 @@ jobs:
           LIBS="native-android-sdk/sdk/libs"
           mkdir -p "$LIBS"
           rm -rf "$LIBS/flutter_repo"
-          cp -r flutter_chat_module/build/host/outputs/repo "$LIBS/flutter_repo"
+          cp -r flutter-chat-sdk/flutter_chat_module/build/host/outputs/repo "$LIBS/flutter_repo"
 
       # ── Publish Kotlin SDK AAR to a local Maven directory ──────────
       #    Output goes to /tmp/maven-publish — we'll push this to gh-pages
@@ -97,7 +97,7 @@ jobs:
 
       - name: Copy Flutter AAR into Maven publish dir
         run: |
-          cp -r flutter_chat_module/build/host/outputs/repo/. /tmp/maven-publish/
+          cp -r flutter-chat-sdk/flutter_chat_module/build/host/outputs/repo/. /tmp/maven-publish/
 
       # ── Checkout gh-pages branch and push the Maven artifacts ──────
 
