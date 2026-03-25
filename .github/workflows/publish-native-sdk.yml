@@ -1,0 +1,174 @@
+name: Publish Native Android SDK
+
+# Publishes the SDK to GitHub Pages as a public Maven repository.
+# Consumers need NO token, NO credentials — just a plain HTTPS URL.
+#
+# How to release:
+# 1. Enable GitHub Pages: repo Settings → Pages → Source: "Deploy from a branch" → branch: gh-pages / root
+# 2. Go to GitHub → Actions → "Publish Native Android SDK" → Run workflow
+# 3. Enter version (e.g. 1.2.0)
+# 4. Consumer adds:  maven { url "https://YOURNAME.github.io/flutter-chat-sdk/maven" }
+#                    implementation 'com.flutterchat:chat-sdk:1.2.0'
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'SDK version to publish (e.g. 1.2.0)'
+        required: true
+      notes:
+        description: 'Release notes'
+        required: false
+        default: 'New release'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  publish:
+    name: Build & Publish to GitHub Pages Maven
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Setup ──────────────────────────────────────────────────────
+
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+          channel: stable
+          cache: true
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # ── Build Flutter AAR ──────────────────────────────────────────
+
+      - name: Flutter pub get
+        working-directory: flutter_chat_module
+        run: flutter pub get
+
+      - name: Build Flutter AAR
+        working-directory: flutter_chat_module
+        run: |
+          flutter build aar \
+            --no-profile \
+            --no-debug \
+            --build-number 1
+
+      # ── Copy Flutter AAR for SDK build ─────────────────────────────
+
+      - name: Copy Flutter AAR to SDK libs
+        run: |
+          LIBS="native-android-sdk/sdk/libs"
+          mkdir -p "$LIBS"
+          rm -rf "$LIBS/flutter_repo"
+          cp -r flutter_chat_module/build/host/outputs/repo "$LIBS/flutter_repo"
+
+      # ── Publish Kotlin SDK AAR to a local Maven directory ──────────
+      #    Output goes to /tmp/maven-publish — we'll push this to gh-pages
+
+      - name: Publish SDK to local Maven repo
+        working-directory: native-android-sdk
+        run: |
+          gradle :sdk:publish \
+            -PSDK_VERSION=${{ github.event.inputs.version }} \
+            -PGITHUB_REPO=${{ github.repository }} \
+            -PMAVEN_REPO_URL=file:///tmp/maven-publish
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── Also copy the Flutter engine AAR into the Maven repo ───────
+      #    So consumers only need the one maven{} block (no storage.googleapis.com)
+
+      - name: Copy Flutter AAR into Maven publish dir
+        run: |
+          cp -r flutter_chat_module/build/host/outputs/repo/. /tmp/maven-publish/
+
+      # ── Checkout gh-pages branch and push the Maven artifacts ──────
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages-dir
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Copy Maven artifacts into gh-pages/maven
+        run: |
+          mkdir -p gh-pages-dir/maven
+          cp -r /tmp/maven-publish/. gh-pages-dir/maven/
+
+      - name: Commit and push to gh-pages
+        working-directory: gh-pages-dir
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add maven/
+          git commit -m "chore: publish SDK v${{ github.event.inputs.version }}" || echo "Nothing to commit"
+          git push origin gh-pages
+
+      # ── Tag & Release on main ──────────────────────────────────────
+
+      - name: Create Git tag
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          TAG="native-v${{ github.event.inputs.version }}"
+          git tag "$TAG"
+          git push origin "$TAG"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "native-v${{ github.event.inputs.version }}"
+          name: "Native SDK v${{ github.event.inputs.version }}"
+          body: |
+            ${{ github.event.inputs.notes }}
+
+            ---
+
+            **Install in your Android app — no token or credentials needed:**
+
+            **1. Add to your root `build.gradle`:**
+            ```groovy
+            allprojects {
+                repositories {
+                    google()
+                    mavenCentral()
+                    // Flutter Chat SDK — public, no auth required
+                    maven { url "https://${{ github.repository_owner }}.github.io/flutter-chat-sdk/maven" }
+                }
+            }
+            ```
+
+            **2. Add the dependency to `app/build.gradle`:**
+            ```groovy
+            dependencies {
+                implementation 'com.flutterchat:chat-sdk:${{ github.event.inputs.version }}'
+            }
+            ```
+
+            **3. Use in Kotlin:**
+            ```kotlin
+            FlutterChatSDK.openChat(
+                context = this,
+                user = ChatUser(id = "1", name = "John", email = "john@test.com")
+            )
+            ```
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

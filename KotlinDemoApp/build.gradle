@@ -1,0 +1,35 @@
+buildscript {
+    ext.kotlin_version = '1.9.22'
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.3.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+
+        // Flutter engine — required for Flutter embedding transitive dependency
+        maven {
+            url "https://storage.googleapis.com/download.flutter.io"
+        }
+
+        // ── Option A: Published SDK from GitHub Pages (public, no auth) ──
+        // maven { url "https://YOUR_GITHUB_USERNAME.github.io/flutter-chat-sdk/maven" }
+
+        // ── Option B: Use the SDK from local Maven repo (for development) ──
+        maven {
+            url uri("${rootProject.projectDir}/../native-android-sdk/sdk/libs/flutter_repo")
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

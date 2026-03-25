@@ -1,0 +1,7 @@
+rootProject.name = 'KotlinDemoApp'
+include ':app'
+
+// Include the SDK module from the sibling directory for local development.
+// Remove this and switch to the Maven dependency in app/build.gradle for production.
+include ':sdk'
+project(':sdk').projectDir = new File(rootDir, '../native-android-sdk/sdk')

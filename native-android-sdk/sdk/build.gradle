@@ -1,0 +1,71 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'maven-publish'
+
+android {
+    compileSdk 34
+    namespace 'com.flutterchat.sdk'
+
+    defaultConfig {
+        minSdk 24
+        targetSdk 34
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+    // Local Flutter AAR Maven repo (populated by CI or manual build)
+    maven {
+        url uri("$projectDir/libs/flutter_repo")
+    }
+    // Flutter engine
+    maven {
+        url "https://storage.googleapis.com/download.flutter.io"
+    }
+}
+
+dependencies {
+    // Flutter AAR — version matches --build-number used in CI
+    implementation 'com.flutterchat.module:flutter_release:1'
+}
+
+// ── Maven publishing to GitHub Pages (public, no auth) ──────────────────────
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId = 'com.flutterchat'
+                artifactId = 'chat-sdk'
+                version = project.findProperty('SDK_VERSION') ?: '1.0.0'
+
+                pom {
+                    name = 'Flutter Chat SDK'
+                    description = 'Native Android SDK for Flutter Chat — embed a Flutter-powered chat UI in any Kotlin/Java Android app.'
+                    url = "https://github.com/${project.findProperty('GITHUB_REPO') ?: 'OWNER/flutter-chat-sdk'}"
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                name = "GitHubPages"
+                // CI passes -PMAVEN_REPO_URL=file:///tmp/maven-publish
+                // Local dev can pass -PMAVEN_REPO_URL=file:///path/to/local/repo
+                url = uri(project.findProperty('MAVEN_REPO_URL') ?: "$buildDir/maven-publish")
+            }
+        }
+    }
+}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!--
+            FlutterChatActivity is declared in the SDK manifest.
+            Android's manifest merger will include this in the consumer app automatically.
+        -->
+        <activity
+            android:name="com.flutterchat.sdk.FlutterChatActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:exported="false"
+            android:hardwareAccelerated="true"
+            android:theme="@style/FlutterChatTheme"
+            android:windowSoftInputMode="adjustResize" />
+    </application>
+
+</manifest>
