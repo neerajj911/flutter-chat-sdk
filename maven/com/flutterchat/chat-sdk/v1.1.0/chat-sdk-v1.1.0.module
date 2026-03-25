@@ -1,0 +1,103 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "com.flutterchat",
+    "module": "chat-sdk",
+    "version": "v1.1.0",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.6"
+    }
+  },
+  "variants": [
+    {
+      "name": "releaseApiElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "1.9.22"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "chat-sdk-v1.1.0.aar",
+          "url": "chat-sdk-v1.1.0.aar",
+          "size": 12181,
+          "sha512": "1679e734610869caebea313a8fe4bb03d92601e1ba8cf0179a733e04ff844ea6531cea7f111d7c48e64c1fa5243a898100e62d2173d5e78be88f4096de42df92",
+          "sha256": "2cf0a8bb371fbee0d6ab2b58c689a2a28666bfde18038c9be15dbe8597a44736",
+          "sha1": "1735cbf8f197a52667ad136943659dc8bf44e907",
+          "md5": "1608648cd16ba802743b86d3d2fcae4b"
+        }
+      ]
+    },
+    {
+      "name": "releaseRuntimeElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "dependencies": [
+        {
+          "group": "com.flutterchat.module",
+          "module": "flutter_release",
+          "version": {
+            "requires": "1"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "1.9.22"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "chat-sdk-v1.1.0.aar",
+          "url": "chat-sdk-v1.1.0.aar",
+          "size": 12181,
+          "sha512": "1679e734610869caebea313a8fe4bb03d92601e1ba8cf0179a733e04ff844ea6531cea7f111d7c48e64c1fa5243a898100e62d2173d5e78be88f4096de42df92",
+          "sha256": "2cf0a8bb371fbee0d6ab2b58c689a2a28666bfde18038c9be15dbe8597a44736",
+          "sha1": "1735cbf8f197a52667ad136943659dc8bf44e907",
+          "md5": "1608648cd16ba802743b86d3d2fcae4b"
+        }
+      ]
+    },
+    {
+      "name": "releaseSourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "files": [
+        {
+          "name": "chat-sdk-v1.1.0-sources.jar",
+          "url": "chat-sdk-v1.1.0-sources.jar",
+          "size": 5933,
+          "sha512": "e91b0d88fe0744c9ea951ca5123829b019ea0d06928d6c25c023df27183429246a57eee8deeb4f5c1c353d59fd84c3249370bb48788b014d336f47bf8eec373a",
+          "sha256": "5f2050ff58576b1802bb9e5d9395340edccb1a08ad60060cd144b2e17947f0dd",
+          "sha1": "60b43969e363071c630f245447ed6eca8fb41385",
+          "md5": "9fd985f52ca4c9aef598884d6295ae64"
+        }
+      ]
+    }
+  ]
+}
